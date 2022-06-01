@@ -1,17 +1,24 @@
 package com.github.yeeun_yun97.toy.exoplayerexample
 
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
 import android.widget.Toast
+import androidx.annotation.IntRange
 import com.github.yeeun_yun97.toy.exoplayerexample.analytics.EventLoggerExample
 import com.github.yeeun_yun97.toy.exoplayerexample.analytics.PlaybackStatsListenerExample
 import com.github.yeeun_yun97.toy.exoplayerexample.analytics.PlayerAnalyticsListenerExample
 import com.github.yeeun_yun97.toy.exoplayerexample.databinding.ActivityMainBinding
+import com.google.android.exoplayer2.C.SELECTION_FLAG_DEFAULT
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.MediaItem.AdsConfiguration
+import com.google.android.exoplayer2.MediaItem.SubtitleConfiguration
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.source.ShuffleOrder
+import com.google.android.exoplayer2.util.MimeTypes
+import com.google.common.collect.ImmutableList
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -120,6 +127,46 @@ class MainActivity : AppCompatActivity() {
         return MediaItem.Builder().setUri(url).setMediaId(mediaId).setTag(tag).build()
     }
 
+    private fun sideloadSubtitleMediaItem(videoUri: String, subtitleUri: String): MediaItem {
+        val subtitle = SubtitleConfiguration.Builder(Uri.parse(subtitleUri))
+            .setMimeType(MimeTypes.APPLICATION_SUBRIP) // The correct MIME type (required).
+            .setLanguage("ko-kr") // The subtitle language (optional).
+            .setSelectionFlags(SELECTION_FLAG_DEFAULT) // Selection flags for the track (optional).
+            .build()
+        val mediaItem: MediaItem = MediaItem.Builder()
+            .setUri(videoUri)
+            .setSubtitleConfigurations(ImmutableList.of(subtitle))
+            .build()
+        return mediaItem
+    }
+
+    private fun clip(
+        videoUri: String,
+        @IntRange(from = 0) startPositionMs: Long,
+        endPositionMs: Long
+    ) : MediaItem{
+        val mediaItem: MediaItem = MediaItem.Builder()
+            .setUri(videoUri)
+            .setClippingConfiguration(
+                MediaItem.ClippingConfiguration.Builder()
+                    .setStartPositionMs(startPositionMs)
+                    .setEndPositionMs(endPositionMs)
+                    .build()
+            )
+            .build()
+        return mediaItem
+    }
+
+    private fun adMediaItem(videoUri: String, adTagUri:Uri) : MediaItem{
+        val mediaItem: MediaItem = MediaItem.Builder()
+            .setUri(videoUri)
+            .setAdsConfiguration(
+                AdsConfiguration.Builder(adTagUri).build()
+            )
+            .build()
+        return mediaItem
+    }
+
     override fun onResume() {
         super.onResume()
         playPlayList()
@@ -155,7 +202,7 @@ class MainActivity : AppCompatActivity() {
         // if turn on shuffleMode, seekToNextMediaItem will play randomized next item
         player.shuffleModeEnabled = true
 
-        val array : IntArray = listOf(3, 1, 0, 4, 2).toIntArray()
+        val array: IntArray = listOf(3, 1, 0, 4, 2).toIntArray()
 
         // set custom shuffle order
         player.setShuffleOrder(
