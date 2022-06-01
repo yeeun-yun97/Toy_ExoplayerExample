@@ -16,9 +16,11 @@ import com.google.android.exoplayer2.MediaItem.AdsConfiguration
 import com.google.android.exoplayer2.MediaItem.SubtitleConfiguration
 import com.google.android.exoplayer2.source.ShuffleOrder
 import com.google.android.exoplayer2.source.TrackGroup
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.TrackSelectionOverrides
 import com.google.android.exoplayer2.util.MimeTypes
 import com.google.common.collect.ImmutableList
+import com.google.common.collect.ImmutableSet
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -47,6 +49,16 @@ class MainActivity : AppCompatActivity() {
 
         // create player and bind with view
         _player = ExoPlayer.Builder(this).build()
+
+
+       // customize track selector
+        val trackSelector = DefaultTrackSelector(this)
+        trackSelector.parameters = trackSelector.buildUponParameters()
+            .setAllowVideoMixedMimeTypeAdaptiveness(true)           // set advanced customization options here
+            .build()
+        _player = ExoPlayer.Builder(this).setTrackSelector(trackSelector).build()
+
+
         binding.playerView.player = player
 
         // add player listener
@@ -125,6 +137,13 @@ class MainActivity : AppCompatActivity() {
             .build()
         player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
             .setTrackSelectionOverrides(overrides).build()
+
+        // disable track types or groups
+        player.trackSelectionParameters=
+                player.trackSelectionParameters.buildUpon()
+                    .setDisabledTrackTypes(ImmutableSet.of(C.TRACK_TYPE_VIDEO)) // disable track type video
+                    .build()
+
 
 
 
