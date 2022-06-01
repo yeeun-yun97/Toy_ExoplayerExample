@@ -10,13 +10,13 @@ import com.github.yeeun_yun97.toy.exoplayerexample.analytics.EventLoggerExample
 import com.github.yeeun_yun97.toy.exoplayerexample.analytics.PlaybackStatsListenerExample
 import com.github.yeeun_yun97.toy.exoplayerexample.analytics.PlayerAnalyticsListenerExample
 import com.github.yeeun_yun97.toy.exoplayerexample.databinding.ActivityMainBinding
+import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.C.SELECTION_FLAG_DEFAULT
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.MediaItem.AdsConfiguration
 import com.google.android.exoplayer2.MediaItem.SubtitleConfiguration
-import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.source.ShuffleOrder
+import com.google.android.exoplayer2.source.TrackGroup
+import com.google.android.exoplayer2.trackselection.TrackSelectionOverrides
 import com.google.android.exoplayer2.util.MimeTypes
 import com.google.common.collect.ImmutableList
 import java.util.*
@@ -97,6 +97,36 @@ class MainActivity : AppCompatActivity() {
         player.nextMediaItemIndex
         */
 
+        // track info 1. by listener handle trackinfo change event
+        player.addListener(object : Player.Listener {
+            override fun onTracksInfoChanged(tracksInfo: TracksInfo) {
+                handleCurrentTrackInfo(tracksInfo)
+            }
+        })
+
+        // track info 2. get current trackInfo
+        val tracksInfo = player.currentTracksInfo
+        this.handleCurrentTrackInfo(tracksInfo)
+
+
+        // set constraint to tracks (for simplify selecting track..ect)
+
+        // set max size and set preferred audio language
+        player.trackSelectionParameters =
+            player.trackSelectionParameters.buildUpon()
+                .setMaxVideoSizeSd()                            // set max size to 1279*719
+                .setPreferredAudioLanguage("ko-KR")             // set preferred audio language using IETF BCP 47 conformant tag
+                .build()
+
+        // select audio track group and prevent other audio track groups
+        val audioTrackGroup : TrackGroup? = null
+        val overrides = TrackSelectionOverrides.Builder()
+            .setOverrideForType(TrackSelectionOverrides.TrackSelectionOverride(audioTrackGroup!!))
+            .build()
+        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+            .setTrackSelectionOverrides(overrides).build()
+
+
 
         // repeat mode
         setRepeatMode()
@@ -104,6 +134,21 @@ class MainActivity : AppCompatActivity() {
         // shuffle mode
         setShuffleMode()
 
+    }
+
+    private fun handleCurrentTrackInfo(tracksInfo: TracksInfo) {
+        for (groupInfo in tracksInfo.trackGroupInfos) {   // 그룹에 대한 정보.
+            val trackType =
+                groupInfo.trackType         // trackType : None, unknown, default, audio, video, text, image, metadata, cameraMotion..
+            groupInfo.isSelected                        // 하나라도 그룹 내의 트랙이 재생을 위해 선택되어 있으면 true.
+            groupInfo.isSupported                       // 하나라도 그룹 내의 트랙이 기기의 성능 안에 가능하면 true
+            val group = groupInfo.trackGroup            // groupInfo가 설명하던 그룹을 반환한다.
+            for (i in 0..group.length) {
+                groupInfo.isTrackSupported(i)           // 그룹의 i번째 트랙이 기기의 성능 안에 가능한가.
+                groupInfo.isTrackSelected(i)            // 그룹의 i번째 트략이 선택되어 있는가.
+                group.getFormat(i)                      // (width, height, frameRate, codecs, metadata 등 )트랙에 대한 형식 정보를 가져온다.
+            }
+        }
     }
 
     private fun modifyPlaylist() {
@@ -144,7 +189,7 @@ class MainActivity : AppCompatActivity() {
         videoUri: String,
         @IntRange(from = 0) startPositionMs: Long,
         endPositionMs: Long
-    ) : MediaItem{
+    ): MediaItem {
         val mediaItem: MediaItem = MediaItem.Builder()
             .setUri(videoUri)
             .setClippingConfiguration(
@@ -157,7 +202,7 @@ class MainActivity : AppCompatActivity() {
         return mediaItem
     }
 
-    private fun adMediaItem(videoUri: String, adTagUri:Uri) : MediaItem{
+    private fun adMediaItem(videoUri: String, adTagUri: Uri): MediaItem {
         val mediaItem: MediaItem = MediaItem.Builder()
             .setUri(videoUri)
             .setAdsConfiguration(
