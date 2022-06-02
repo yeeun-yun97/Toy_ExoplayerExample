@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ExoPlayerExample</string>
+    <string name="noti_channel_name">noti channel name</string>
 </resources>

@@ -132,18 +132,19 @@ class MainActivity : AppCompatActivity() {
                 .build()
 
         // select audio track group and prevent other audio track groups
-        val audioTrackGroup : TrackGroup? = null
+        /*val audioTrackGroup : TrackGroup? = null
         val overrides = TrackSelectionOverrides.Builder()
             .setOverrideForType(TrackSelectionOverrides.TrackSelectionOverride(audioTrackGroup!!))
             .build()
         player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
             .setTrackSelectionOverrides(overrides).build()
+            */
 
         // disable track types or groups
-        player.trackSelectionParameters=
-                player.trackSelectionParameters.buildUpon()
-                    .setDisabledTrackTypes(ImmutableSet.of(C.TRACK_TYPE_VIDEO)) // disable track type video
-                    .build()
+//        player.trackSelectionParameters=
+//                player.trackSelectionParameters.buildUpon()
+//                    .setDisabledTrackTypes(ImmutableSet.of(C.TRACK_TYPE_VIDEO)) // disable track type video
+//                    .build()
 
         binding.playerView.setShowBuffering(SHOW_BUFFERING_WHEN_PLAYING)
 
@@ -165,7 +166,7 @@ class MainActivity : AppCompatActivity() {
             groupInfo.isSelected                        // 하나라도 그룹 내의 트랙이 재생을 위해 선택되어 있으면 true.
             groupInfo.isSupported                       // 하나라도 그룹 내의 트랙이 기기의 성능 안에 가능하면 true
             val group = groupInfo.trackGroup            // groupInfo가 설명하던 그룹을 반환한다.
-            for (i in 0..group.length) {
+            for (i in 0 until group.length) {
                 groupInfo.isTrackSupported(i)           // 그룹의 i번째 트랙이 기기의 성능 안에 가능한가.
                 groupInfo.isTrackSelected(i)            // 그룹의 i번째 트략이 선택되어 있는가.
                 group.getFormat(i)                      // (width, height, frameRate, codecs, metadata 등 )트랙에 대한 형식 정보를 가져온다.
