@@ -18,6 +18,7 @@ import com.google.android.exoplayer2.source.ShuffleOrder
 import com.google.android.exoplayer2.source.TrackGroup
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.TrackSelectionOverrides
+import com.google.android.exoplayer2.ui.StyledPlayerView.SHOW_BUFFERING_WHEN_PLAYING
 import com.google.android.exoplayer2.util.MimeTypes
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
@@ -143,6 +144,8 @@ class MainActivity : AppCompatActivity() {
                 player.trackSelectionParameters.buildUpon()
                     .setDisabledTrackTypes(ImmutableSet.of(C.TRACK_TYPE_VIDEO)) // disable track type video
                     .build()
+
+        binding.playerView.setShowBuffering(SHOW_BUFFERING_WHEN_PLAYING)
 
 
 
